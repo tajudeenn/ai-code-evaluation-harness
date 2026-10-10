@@ -3,6 +3,7 @@ import json
 import streamlit as st
 
 from benchmarks import BENCHMARKS
+from custom_cases import parse_custom_cases
 from harness import TestCase, compare, evaluate
 
 st.set_page_config(page_title="BioCode Eval", page_icon="🧪", layout="wide")
@@ -62,14 +63,11 @@ with tab_custom:
     custom_code = st.text_area("Candidate code", starter, height=220, key="custom_code")
     if st.button("Evaluate custom task", type="primary"):
         try:
-            parsed = json.loads(raw_cases)
-            tests = [TestCase(str(c.get("name", f"case {i+1}")), c["input"], c["expected"], bool(c.get("edge_case", False))) for i, c in enumerate(parsed)]
-            if not isinstance(parsed, list) or not tests:
-                raise ValueError("Provide at least one test case as a JSON array.")
+            tests = parse_custom_cases(raw_cases)
             st.session_state["custom_result"] = report_context(
                 evaluate(custom_code, tests, timeout), task_id="CUSTOM",
                 task_title="Custom task", prompt=custom_prompt, candidate="Candidate")
-        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
+        except ValueError as exc:
             st.error(f"Could not read those test cases: {exc}")
 
 

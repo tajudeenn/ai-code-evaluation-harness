@@ -2,6 +2,8 @@
 
 A small portfolio project for evaluating AI-generated Python against reproducible tests. The starter benchmark contains 24 original quantitative science and biotechnology tasks, each with a reference solution and normal/edge-case examples. Use the app to evaluate one candidate, compare two candidates on identical cases, or define a small custom task using JSON inputs and expected outputs.
 
+[![Tests](https://github.com/tajudeenn/ai-code-evaluation-harness/actions/workflows/tests.yml/badge.svg)](https://github.com/tajudeenn/ai-code-evaluation-harness/actions/workflows/tests.yml)
+
 ## Features
 
 - Correctness score, per-case expected/actual values, edge-case score, and elapsed runtime.
@@ -41,6 +43,10 @@ python smoke_check.py
 
 Choose **BIO03 · qPCR ΔΔCt** for a compact demo. The benchmark reference solution is prefilled in Compare Candidate A; leave the simple placeholder in Candidate B, then click **Compare on same tests**. To see custom task flow, submit one JSON case such as `[{"name":"example","input":{"value":2},"expected":2}]` and a `solve(data)` function returning `data["value"]`.
 
+## Live demo
+
+Try [BioCode Eval on Streamlit Community Cloud](https://ai-code-evaluation-harness-kktzxrrb4sbijq5kfik3xn.streamlit.app/). For the quickest walkthrough, select **BIO03 · qPCR ΔΔCt**, open **Compare two**, keep the reference solution in Candidate A, and compare it with the placeholder in Candidate B. The report shows per-case results, edge-case performance, runtime, and downloadable JSON reports. The custom-task form also accepts a JSON array of cases; malformed inputs are reported inline with a helpful validation message.
+
 ## Reading the report
 
 Correctness is passed cases divided by total cases; floating point values use a small numeric tolerance. Edge cases are also counted separately. Runtime is the sum of per-case wall-clock times, including process startup overhead. Expected and actual values are displayed so failures are explainable. The report does not automatically grade style, clarity, or whether a scientifically plausible algorithm was chosen when the supplied examples are insufficient. Use the [human review rubric](review_rubric.md) for those dimensions, or connect a separately configured evaluator and disclose its role.
@@ -55,8 +61,10 @@ For real multi-user or internet-facing use, run each evaluation in a disposable,
 
 - `app.py` — Streamlit interface.
 - `harness.py` — case model, candidate policy checks, subprocess runner, scoring, comparison.
+- `custom_cases.py` — clear validation for custom-task JSON with limits on payload size and case count.
 - `benchmarks.py` — original benchmark prompts, reference solutions, and test cases.
 - `tests/test_harness.py` — scoring, reference benchmark, policy, comparison, numeric tolerance, and timeout checks.
+- `.github/workflows/tests.yml` — GitHub Actions workflow that installs development dependencies and runs pytest on pushes and pull requests.
 - `smoke_check.py` — standard-library validation of all benchmark references and a comparison sanity check.
 - `review_rubric.md` — manual rubric for scientific reasoning, edge cases, clarity, maintainability, and safety awareness.
 

@@ -1,6 +1,7 @@
 import pytest
 
 from benchmarks import BENCHMARKS
+from custom_cases import MAX_CUSTOM_CASES, parse_custom_cases
 from harness import TestCase, evaluate, validate_candidate, values_equal
 
 
@@ -31,3 +32,28 @@ def test_timeout_is_reported():
 def test_nested_numeric_comparison_uses_tolerance():
     assert values_equal({"x": [1.00000001]}, {"x": [1.0]})
     assert not values_equal(True, 1)
+
+
+@pytest.mark.parametrize("raw, message", [
+    ("{}", "JSON array"),
+    ("[]", "at least one"),
+    ("[1]", "must be a JSON object"),
+    ('[{"name":"missing input","expected":1}]', "missing required field"),
+    ('[{"input":{},"expected":1,"edge_case":"no"}]', "must be true or false"),
+    ('[{"name":"  ","input":{},"expected":1}]', "non-empty string"),
+])
+def test_custom_case_parser_rejects_malformed_shapes(raw, message):
+    with pytest.raises(ValueError, match=message):
+        parse_custom_cases(raw)
+
+
+def test_custom_case_parser_accepts_valid_cases_and_defaults():
+    cases = parse_custom_cases('[{"name":" edge ","input":{"x":0},"expected":0,"edge_case":true},{"input":{},"expected":1}]')
+    assert cases == [TestCase("edge", {"x": 0}, 0, True), TestCase("case 2", {}, 1, False)]
+
+
+def test_custom_case_parser_limits_count_and_payload_size():
+    with pytest.raises(ValueError, match="no more than"):
+        parse_custom_cases("[" + ",".join('{"input":{},"expected":0}' for _ in range(MAX_CUSTOM_CASES + 1)) + "]")
+    with pytest.raises(ValueError, match="characters or fewer"):
+        parse_custom_cases(" " * 100_001)
