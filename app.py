@@ -81,7 +81,9 @@ def show_result(result):
     st.info(result["message"])
     if result["cases"]:
         st.dataframe([{"Test": c["name"], "Result": "PASS" if c["passed"] else "FAIL", "Edge case": c["edge_case"], "Expected": c["expected"], "Actual": c["actual"], "Error": c["error"]} for c in result["cases"]], use_container_width=True, hide_index=True)
-    st.download_button("Download report JSON", json.dumps(result, indent=2), "evaluation-report.json", "application/json")
+    download_key = f"download-report-{task.get('id', 'task')}-{result.get('candidate', 'candidate').lower().replace(' ', '-')}"
+    filename = f"{task.get('id', 'evaluation').lower()}-{result.get('candidate', 'candidate').lower().replace(' ', '-')}-report.json"
+    st.download_button("Download report JSON", json.dumps(result, indent=2), filename, "application/json", key=download_key)
 
 
 if "last_result" in st.session_state:
