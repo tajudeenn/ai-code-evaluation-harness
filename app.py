@@ -27,6 +27,12 @@ st.markdown(f"**{selected.category}**  \n{selected.prompt}")
 with st.expander("View evaluation cases"):
     st.json([{"name": t.name, "input": t.input, "expected": t.expected, "edge_case": t.edge_case} for t in selected.tests])
 
+st.warning(
+    "Prototype safety notice: candidate code runs in a separate Python process with "
+    "best-effort restrictions, not a secure sandbox. Do not submit secrets, private "
+    "datasets, or other sensitive information."
+)
+
 tab_single, tab_compare, tab_custom = st.tabs(["Evaluate one", "Compare two", "Custom task"])
 with tab_single:
     starter = "def solve(data):\n    # Return the answer for the provided input dictionary\n    return None"
